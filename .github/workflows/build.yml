@@ -1,0 +1,33 @@
+name: Build Telegram iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          
+      - name: Install dependencies
+        run: |
+          brew install cmake
+          brew install python3
+          
+      - name: Build IPA
+        run: |
+          python3 build-system/Make/Make.py \
+            --overrideXcodeVersion \
+            build \
+            --configurationPath=build-system/appstore-configuration.json \
+            --codesigningInformationPath=build-system/fake-codesigning
+            
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: Telegram-iOS
+          path: build/artifacts/*.ipa
